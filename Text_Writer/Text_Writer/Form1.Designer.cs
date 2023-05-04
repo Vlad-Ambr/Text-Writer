@@ -36,7 +36,10 @@ namespace Text_Writer
             this.ClientSize = new Size(800, 450);
             this.Text = "My Text Editor";
             this.MinimumSize = new System.Drawing.Size(1280, 720);
-
+            this.Load += ChangeTextStyleRegular;
+            this.Load += ChangePositionLeft;
+            this.Load += DayTheme;
+            this.FormClosed += ExitForApp;
             this.SizeChanged += (s, e) =>
             {
                 LeftBarTextOption.Width = this.Width / 4;
@@ -178,8 +181,7 @@ namespace Text_Writer
             //
             //  MenuStrip 'UpBarMenu':
             //
-            UpBarMenu = new MenuStrip();
-            UpBarMenu.BackColor = Color.FromArgb(62, 63, 64);
+            UpBarMenu = new MenuStrip();           
             this.Controls.Add(UpBarMenu);
 
 
@@ -187,10 +189,9 @@ namespace Text_Writer
             //
             //  ToolStripMenuItem 'NewFileItem': Створити файл
             //
-            NewFileItem = new ToolStripMenuItem();
-            NewFileItem.BackColor = Color.FromArgb(62, 63, 64);
-            NewFileItem.ForeColor = Color.FromArgb(255, 255, 255);
+            NewFileItem = new ToolStripMenuItem();           
             NewFileItem.Text = "New file";
+            NewFileItem.Click += CreateFile;
             UpBarMenu.Items.Add(NewFileItem);
 
 
@@ -198,10 +199,9 @@ namespace Text_Writer
             //
             //  ToolStripMenuItem 'OpenFileItem': Відкрити файл
             //
-            OpenFileItem = new ToolStripMenuItem();
-            OpenFileItem.BackColor = Color.FromArgb(62, 63, 64);
-            OpenFileItem.ForeColor = Color.FromArgb(255, 255, 255);
+            OpenFileItem = new ToolStripMenuItem();           
             OpenFileItem.Text = "Open file";
+            OpenFileItem.Click += OpenFileForCorrect;
             UpBarMenu.Items.Add(OpenFileItem);
 
 
@@ -210,9 +210,9 @@ namespace Text_Writer
             //  ToolStripMenuItem 'SaveFileItem': Зберегти файл
             //
             SaveFileItem = new ToolStripMenuItem();
-            SaveFileItem.BackColor = Color.FromArgb(62, 63, 64);
-            SaveFileItem.ForeColor = Color.FromArgb(255, 255, 255);
-            SaveFileItem.Text = "Save file";
+            SaveFileItem.Text = "Save";
+            SaveFileItem.Click += SaveCorrectFile;
+            SaveFileItem.Enabled = false;
             UpBarMenu.Items.Add(SaveFileItem);
 
 
@@ -222,20 +222,20 @@ namespace Text_Writer
             //
             ThemeItem = new ToolStripMenuItem();
             ThemeItem.Text = "Theme";
-            ThemeItem.DropDownItems.Add(new ToolStripMenuItem("Night"));
-            ThemeItem.DropDownItems.Add(new ToolStripMenuItem("Day"));
+            ThemeItem.DropDownItems.Add(new ToolStripMenuItem("Night", null, NightTheme));
+            ThemeItem.DropDownItems.Add(new ToolStripMenuItem("Day", null, DayTheme));
             ThemeItem.ForeColor = Color.FromArgb(255, 255, 255);
             UpBarMenu.Items.Add(ThemeItem);
 
 
 
             //
-            //  ToolStripMenuItem 'ExitItem': вихід з додатку
             //
-            ExitItem = new ToolStripMenuItem();
-            ExitItem.Text = "Exit";
-            ExitItem.ForeColor = Color.FromArgb(255, 255, 255);
-            UpBarMenu.Items.Add(ExitItem);
+            //
+            PathFileItem = new ToolStripMenuItem();
+            PathFileItem.Text = $"Path file: ";
+            PathFileItem.Enabled = false;            
+            UpBarMenu.Items.Add(PathFileItem);
             #endregion
 
             #region Text change bar
@@ -246,7 +246,7 @@ namespace Text_Writer
             LeftBarTextOption.Width = this.Width / 4;
             LeftBarTextOption.Height = this.Height - UpBarMenu.Height - 38;
             LeftBarTextOption.Location = new Point(0, UpBarMenu.Height);
-            LeftBarTextOption.BackColor = Color.FromArgb(62, 63, 64);
+            
             this.Controls.Add(LeftBarTextOption);
 
 
@@ -279,7 +279,8 @@ namespace Text_Writer
             TextFontFamily.Items.Add("Impact");
             TextFontFamily.Items.Add("Courier");
             TextFontFamily.KeyPress += (s, e) => e.Handled = true;
-            TextFontFamily.SelectedIndex = 0;
+            TextFontFamily.SelectedIndex = 4;
+            TextFontFamily.SelectedIndexChanged += ChangeTextFamily;
             TextFontFamily.Location = new Point((LeftBarTextOption.Width / 2) - (TextFontFamily.Width / 2), FontFamilyLabel.Location.Y + FontFamilyLabel.Height);
             LeftBarTextOption.Controls.Add(TextFontFamily);
 
@@ -289,8 +290,7 @@ namespace Text_Writer
             //
             //  Label 'FontSizeLabel'
             //
-            FontSizeLabel = new Label();
-            
+            FontSizeLabel = new Label();           
             FontSizeLabel.Font = new Font(FontSizeLabel.Font.FontFamily, FontFamilyLabel.Font.Size);
             FontSizeLabel.Width = int.Parse(FontSizeLabel.Font.Size.ToString()) * 7;
             FontSizeLabel.Height = int.Parse(FontSizeLabel.Font.Size.ToString()) * 2;
@@ -323,6 +323,7 @@ namespace Text_Writer
             TextFontSize.Items.Add("96");
             TextFontSize.KeyPress += (s, e) => e.Handled = true;
             TextFontSize.SelectedIndex = 0;
+            TextFontSize.SelectedIndexChanged += ChangeTextSize;
             TextFontSize.Location = new Point((LeftBarTextOption.Width / 2) - (TextFontFamily.Width / 2), FontSizeLabel.Location.Y + FontSizeLabel.Height);
             LeftBarTextOption.Controls.Add(TextFontSize);
 
@@ -362,6 +363,7 @@ namespace Text_Writer
             BoldText.Height = PanelFontStyle.Height - 10;
             BoldText.Width = PanelFontStyle.Width / 5 - 10;
             BoldText.Font = new Font(BoldText.Font.FontFamily, BoldText.Width / 5, FontStyle.Bold);
+            BoldText.Click += ChangeTextStyleBold;
             BoldText.Location = new Point(5, 5);
             PanelFontStyle.Controls.Add(BoldText);
 
@@ -376,6 +378,7 @@ namespace Text_Writer
             ItalicText.Height = PanelFontStyle.Height - 10;
             ItalicText.Width = PanelFontStyle.Width / 5 - 10;
             ItalicText.Font = new Font(ItalicText.Font.FontFamily, ItalicText.Width / 5, FontStyle.Italic);
+            ItalicText.Click += ChangeTextStyleItalic;
             ItalicText.Location = new Point(BoldText.Location.X + BoldText.Width + 10, 5);
             PanelFontStyle.Controls.Add(ItalicText);
 
@@ -390,6 +393,7 @@ namespace Text_Writer
             RegularText.Height = PanelFontStyle.Height - 10;
             RegularText.Width = PanelFontStyle.Width / 5 - 10;
             RegularText.Font = new Font(RegularText.Font.FontFamily, RegularText.Width / 5, FontStyle.Regular);
+            RegularText.Click += ChangeTextStyleRegular;
             RegularText.Location = new Point(ItalicText.Location.X + ItalicText.Width + 10, 5);
             PanelFontStyle.Controls.Add(RegularText);
 
@@ -404,6 +408,7 @@ namespace Text_Writer
             StrikeoutText.Height = PanelFontStyle.Height - 10;
             StrikeoutText.Width = PanelFontStyle.Width / 5 - 10;
             StrikeoutText.Font = new Font(StrikeoutText.Font.FontFamily, StrikeoutText.Width / 5, FontStyle.Strikeout);
+            StrikeoutText.Click += ChangeTextStyleStrikeout;
             StrikeoutText.Location = new Point(RegularText.Location.X + RegularText.Width + 10, 5);
             PanelFontStyle.Controls.Add(StrikeoutText);
 
@@ -418,6 +423,7 @@ namespace Text_Writer
             UnderlineText.Height = PanelFontStyle.Height - 10;
             UnderlineText.Width = PanelFontStyle.Width / 5 - 10;
             UnderlineText.Font = new Font(UnderlineText.Font.FontFamily, UnderlineText.Width / 5, FontStyle.Underline);
+            UnderlineText.Click += ChangeTextStyleUnderline;
             UnderlineText.Location = new Point(StrikeoutText.Location.X + StrikeoutText.Width + 10, 5);
             PanelFontStyle.Controls.Add(UnderlineText);
 
@@ -458,6 +464,7 @@ namespace Text_Writer
             LeftPositionText.Width = PanelFontPosition.Width / 3 - 10;
             LeftPositionText.Height = PanelFontPosition.Height - 10;
             LeftPositionText.Font = new Font(LeftPositionText.Font.FontFamily, LeftPositionText.Width / 8);
+            LeftPositionText.Click += ChangePositionLeft;
             LeftPositionText.Location = new Point(5, 5);
             PanelFontPosition.Controls.Add(LeftPositionText);
 
@@ -473,6 +480,7 @@ namespace Text_Writer
             CenterPositionText.Width = PanelFontPosition.Width / 3 - 10;
             CenterPositionText.Height = PanelFontPosition.Height - 10;
             CenterPositionText.Font = new Font(CenterPositionText.Font.FontFamily, CenterPositionText.Width / 8);
+            CenterPositionText.Click += ChangePositionCenter;
             CenterPositionText.Location = new Point(LeftPositionText.Location.X + LeftPositionText.Width + 10, 5);
             PanelFontPosition.Controls.Add(CenterPositionText);
 
@@ -488,6 +496,7 @@ namespace Text_Writer
             RightPositionText.Width = PanelFontPosition.Width / 3 - 10;
             RightPositionText.Height = PanelFontPosition.Height - 10;
             RightPositionText.Font = new Font(RightPositionText.Font.FontFamily, RightPositionText.Width / 8);
+            RightPositionText.Click += ChangePositionRight;
             RightPositionText.Location = new Point(CenterPositionText.Location.X + CenterPositionText.Width + 10, 5);
             PanelFontPosition.Controls.Add(RightPositionText);
 
@@ -499,7 +508,6 @@ namespace Text_Writer
             PanelCountWords = new Panel();
             PanelCountWords.Width = LeftBarTextOption.Width - 50;
             PanelCountWords.Height = 115;
-            PanelCountWords.BackColor = Color.FromArgb(37, 38, 39);
             PanelCountWords.Location = new Point((LeftBarTextOption.Width / 2) - (PanelCountWords.Width / 2), LeftBarTextOption.Height - 140);
             LeftBarTextOption.Controls.Add(PanelCountWords);
 
@@ -543,8 +551,7 @@ namespace Text_Writer
                     e.Handled = true;
             };
             LimitWords.Width = 70;
-            LimitWords.ForeColor = Color.FromArgb(255, 255, 255);
-            LimitWords.BackColor = Color.FromArgb(37, 38, 39);
+           
             LimitWords.Location = new Point(PanelCountWords.Width / 2, 45);
             PanelCountWords.Controls.Add(LimitWords);
 
@@ -558,6 +565,7 @@ namespace Text_Writer
             OK.BackColor = Color.FromArgb(255, 255, 255);
             OK.Height = LimitWords.Height;
             OK.Width = OK.Height + 20;
+            OK.Click += FixationLimitWord;
             OK.Location = new Point(LimitWords.Location.X + LimitWords.Width + 10, LimitWords.Location.Y);
             PanelCountWords.Controls.Add(OK); 
 
@@ -568,6 +576,7 @@ namespace Text_Writer
             //
             ProgressBarWords = new ProgressBar();
             ProgressBarWords.Width = PanelCountWords.Width - 20;
+            ProgressBarWords.Minimum = 0;
             ProgressBarWords.Location = new Point((PanelCountWords.Width / 2) - (ProgressBarWords.Width / 2), 75);
             PanelCountWords.Controls.Add(ProgressBarWords);
             #endregion
@@ -583,10 +592,8 @@ namespace Text_Writer
             MainEnterText.WordWrap = true;
             MainEnterText.AcceptsTab = true;
             MainEnterText.ScrollBars = ScrollBars.Both;
-            MainEnterText.TextAlign = HorizontalAlignment.Center;
+            MainEnterText.KeyUp += CheckCountWords;
             MainEnterText.Location = new Point(LeftBarTextOption.Width, UpBarMenu.Height);
-            MainEnterText.BackColor = Color.FromArgb(37, 38, 39);
-            MainEnterText.ForeColor = Color.FromArgb(255, 255, 255);
             this.Controls.Add(MainEnterText);
 
 
@@ -600,6 +607,7 @@ namespace Text_Writer
             ChangeColorText.Width = LeftBarTextOption.Width / 3;
             ChangeColorText.Height = LeftBarTextOption.Height / 11;
             ChangeColorText.Font = new Font(ChangeColorText.Font.FontFamily, ChangeColorText.Width / 11);
+            ChangeColorText.Click += ColorDialogText;
             ChangeColorText.Location = new Point(40, PanelFontPosition.Location.Y + FontPositionLabel.Height * 3);
             LeftBarTextOption.Controls.Add(ChangeColorText);
 
@@ -623,7 +631,7 @@ namespace Text_Writer
         ToolStripMenuItem OpenFileItem;
         ToolStripMenuItem SaveFileItem;
         ToolStripMenuItem ThemeItem;
-        ToolStripMenuItem ExitItem;
+        ToolStripMenuItem PathFileItem;
         //
         Panel LeftBarTextOption;
         ComboBox TextFontFamily;
